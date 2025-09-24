@@ -89,3 +89,29 @@ def test_patch_job(client):
     assert updated["description"] == "New desc"
     assert updated["title"] == "Dev"  # unchanged
 
+def test_put_job():
+    # Create a company first
+    company = client.post("/companies/", json={"name": "JobCo", "website": "http://jobco.com"}).json()
+
+    # Create job
+    job = client.post("/jobs/", json={
+        "title": "Old Job",
+        "description": "Old desc",
+        "salary": 1000,
+        "company_id": company["id"]
+    }).json()
+
+    # Full update
+    put_resp = client.put(f"/jobs/{job['id']}", json={
+        "title": "New Job",
+        "description": "New description",
+        "salary": 2000,
+        "company_id": company["id"]
+    })
+    assert put_resp.status_code == 200
+    updated = put_resp.json()
+
+    assert updated["title"] == "New Job"
+    assert updated["description"] == "New description"
+    assert updated["salary"] == 2000
+

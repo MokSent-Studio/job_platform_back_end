@@ -68,3 +68,21 @@ def test_patch_company():
     updated = patch_response.json()
     assert updated["website"] == "http://new.com"
     assert updated["name"] == "OldCo"  # unchanged
+
+def test_put_company():
+    # Create company
+    create_resp = client.post("/companies/", json={"name": "OldCo", "website": "http://old.com"})
+    assert create_resp.status_code == 200
+    company = create_resp.json()
+
+    # Full update
+    put_resp = client.put(f"/companies/{company['id']}", json={
+        "name": "NewCo",
+        "website": "http://new.com"
+    })
+    assert put_resp.status_code == 200
+    updated = put_resp.json()
+
+    assert updated["name"] == "NewCo"
+    assert updated["website"] == "http://new.com"
+

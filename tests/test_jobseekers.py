@@ -67,3 +67,26 @@ def test_delete_jobseeker():
     # Verify it’s gone
     get_resp = client.get(f"/jobseekers/{jobseeker['id']}")
     assert get_resp.status_code == 404
+
+def test_put_jobseeker():
+    # Create JobSeeker
+    create_resp = client.post("/jobseekers/", json={"name": "Bob", "email": "bob@example.com"})
+    assert create_resp.status_code == 200
+    jobseeker = create_resp.json()
+
+    # Full update (PUT)
+    put_resp = client.put(f"/jobseekers/{jobseeker['id']}", json={
+        "name": "Bob Updated",
+        "email": "bob_updated@example.com"
+    })
+    assert put_resp.status_code == 200
+    updated = put_resp.json()
+
+    assert updated["name"] == "Bob Updated"
+    assert updated["email"] == "bob_updated@example.com"
+
+    # Verify persisted
+    get_resp = client.get(f"/jobseekers/{jobseeker['id']}")
+    assert get_resp.status_code == 200
+    fetched = get_resp.json()
+    assert fetched == updated

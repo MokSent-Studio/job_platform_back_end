@@ -107,3 +107,34 @@ def test_delete_application():
     # Verify it no longer exists
     get_resp = client.get(f"/applications/{app_id}")
     assert get_resp.status_code == 404
+
+def test_put_application():
+    # Create base entities
+    company = client.post("/companies/", json={"name": "AppCo", "website": "http://appco.com"}).json()
+    job = client.post("/jobs/", json={
+        "title": "QA",
+        "description": "Testing",
+        "salary": 3000,
+        "company_id": company["id"]
+    }).json()
+    jobseeker = client.post("/jobseekers/", json={"name": "Alice", "email": "alice@example.com"}).json()
+
+    # Create application
+    application = client.post("/applications/", json={
+        "cover_letter": "Old Letter",
+        "job_id": job["id"],
+        "jobseeker_id": jobseeker["id"]
+    }).json()
+
+    # Full update
+    put_resp = client.put(f"/applications/{application['id']}", json={
+        "cover_letter": "New Full Letter",
+        "job_id": job["id"],
+        "jobseeker_id": jobseeker["id"]
+    })
+    assert put_resp.status_code == 200
+    updated = put_resp.json()
+
+    assert updated["cover_letter"] == "New Full Letter"
+    assert updated["job"]["id"] == job["id"]
+    assert updated["jobseeker"]["id"] == jobseeker["id"]
